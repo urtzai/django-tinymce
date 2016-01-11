@@ -4,10 +4,24 @@ Changelog
 This document describes changes between each past release.
 
 
-2.1.0 (unreleased)
+2.3.0 (unreleased)
 ==================
 
 - Nothing changed yet.
+
+
+2.2.0 (2015-12-23)
+==================
+
+- TinyMCE compressor now use staticfiles to get the file content (and
+  to find files that are in multiple static directory.) (#142)
+
+
+2.1.0 (2015-12-23)
+==================
+
+- Rewrite URL files to let it works with Django 1.9 (#147, #148)
+- Add a CONTRIBUTORS file.
 
 
 2.0.6 (2015-11-12)
