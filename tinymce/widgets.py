@@ -14,6 +14,7 @@ from django.contrib.admin import widgets as admin_widgets
 from django.core.urlresolvers import reverse
 from django.forms.widgets import flatatt
 from django.utils.html import escape
+import json
 try:
     from collections import OrderedDict as SortedDict
 except ImportError:
@@ -62,7 +63,9 @@ class TinyMCE(forms.Textarea):
         mce_config = tinymce.settings.DEFAULT_CONFIG.copy()
         mce_config.update(get_language_config(self.content_language))
         if tinymce.settings.USE_FILEBROWSER:
-            mce_config['file_browser_callback'] = "djangoFileBrowser"
+            mce_config['file_picker_callback'] = "djangoFileBrowser"
+        elif tinymce.settings.USE_PHOTOLOGUE:
+            mce_config['file_picker_callback'] = "djangoPhotologue"
         mce_config.update(self.mce_attrs)
         if mce_config['mode'] == 'exact':
             mce_config['elements'] = attrs['id']
@@ -100,8 +103,11 @@ class TinyMCE(forms.Textarea):
                 'debug': False,
             }
             final_attrs['data-mce-gz-conf'] = json.dumps(compressor_config)
-        final_attrs['data-mce-conf'] = mce_json
         html = ['<textarea%s>%s</textarea>' % (flatatt(final_attrs), escape(value))]
+        html.append(u'<script type="text/javascript">tinyMCE.init(%s)</script>' % mce_json)
+        if 'file_picker_callback' in mce_json:
+            mce_json = json.loads(mce_json)
+            html[1] = html[1].replace('"'+mce_json['file_picker_callback']+'"',mce_json['file_picker_callback'].replace('"',''))
         return mark_safe('\n'.join(html))
 
     def _media(self):
@@ -111,6 +117,8 @@ class TinyMCE(forms.Textarea):
             js = [tinymce.settings.JS_URL]
         if tinymce.settings.USE_FILEBROWSER:
             js.append(reverse('tinymce-filebrowser'))
+        elif tinymce.settings.USE_PHOTOLOGUE:
+            js.append(reverse('tinymce-photologue'))
         js.append('django_tinymce/init_tinymce.js')
         return forms.Media(js=js)
     media = property(_media)

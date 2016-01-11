@@ -9,6 +9,8 @@ from django.template import RequestContext, loader
 from django.utils.translation import ugettext as _
 from tinymce.compressor import gzip_compressor
 from tinymce.widgets import get_language_config
+from django.core.context_processors import csrf
+from django.template.defaultfilters import safe
 import json
 try:
     from django.views.decorators.csrf import csrf_exempt
@@ -137,3 +139,27 @@ def filebrowser(request):
 
     return render_to_response('tinymce/filebrowser.js', {'fb_url': fb_url},
             context_instance=RequestContext(request))
+
+def photologue(request):
+    return render_to_response('tinymce/photologue.js', {'title': _('Photo Browser'), 'button': _('Upload image')},
+            context_instance=RequestContext(request))
+
+def get_photologue(request):
+    from photologue.models import Photo
+    photos = [p.photo for p in Photo.extended.get_queryset().filter(author=request.user).order_by("-id")][:20]
+    data = [{"thumbnail": p.get_home_url(), "original": p.image.url} for p in photos]
+    return HttpResponse(
+        json.dumps(data), content_type='application/json')
+
+def upload_photologue(request):
+    from bitakora.utils.images import handle_uploaded_file
+    if request.FILES:
+        photo = handle_uploaded_file(request.FILES['image'], request.user)
+        data = {"thumbnail": photo.get_home_url(), "original": photo.image.url, 'status': 0}
+    else:
+        data = {
+            'status': 1,
+            'msg': _('No image selected. Please, pick a image'),
+        }
+    return HttpResponse(
+        json.dumps(data), content_type='application/json')
