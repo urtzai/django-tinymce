@@ -76,7 +76,7 @@ src="/static/js/jquery.js"></script>
 
 		function select_img(obj) {
 			var args = top.tinymce.activeEditor.windowManager.getParams();
-			args.setUrl('../..'+$(obj).attr("data-original"));
+			args.setUrl($(obj).attr("data-original"));
 			top.tinymce.activeEditor.windowManager.close();
 	    }
 
