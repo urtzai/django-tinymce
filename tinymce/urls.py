@@ -1,6 +1,7 @@
 # Copyright (c) 2008 Joost Cassee
 # Licensed under the terms of the MIT License (see LICENSE.txt)
 from django.conf.urls import url
+from django.views.generic import TemplateView
 
 from tinymce import views
 
@@ -18,4 +19,5 @@ urlpatterns = [
     url(r'^filebrowser/$', views.filebrowser, name='tinymce-filebrowser'),
     url(r'^photologue.js$', views.photologue, name='tinymce-photologue'),
     url(r'^preview/(?P<name>.+)/$', views.preview, name='tinymce-preview'),
+    url(r'^photologue/panel$', TemplateView.as_view(template_name='templates/photologue/index.html'), name="home"),
 ]
