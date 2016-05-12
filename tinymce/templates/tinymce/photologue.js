@@ -1,7 +1,7 @@
 function djangoPhotologue(callback, value, meta){
     if (meta.filetype == 'image') {
 	    tinymce.activeEditor.windowManager.open({
-		    file: '/static/photologue/index.html',// use an absolute path!
+		    file: '/static/photologue/panel.html',// use an absolute path!
 		    title: '{{title}}',
 		    width: 900,  
 		    height: 450,
