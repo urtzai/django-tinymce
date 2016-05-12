@@ -19,5 +19,5 @@ urlpatterns = [
     url(r'^filebrowser/$', views.filebrowser, name='tinymce-filebrowser'),
     url(r'^photologue.js$', views.photologue, name='tinymce-photologue'),
     url(r'^preview/(?P<name>.+)/$', views.preview, name='tinymce-preview'),
-    url(r'^photologue/panel$', TemplateView.as_view(template_name='templates/photologue/index.html'), name="home"),
+    url(r'^photologue/panel/$', TemplateView.as_view(template_name='templates/photologue/index.html'), name="home"),
 ]
