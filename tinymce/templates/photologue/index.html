@@ -1,0 +1,110 @@
+<script type="text/javascript"
+src="/static/js/jquery.js"></script>
+<link type="text/css" href="/static/css/bootstrap.min.css" rel="stylesheet">
+<style type="text/css">
+    .content {
+        margin-top: 10px;
+    }
+    .imgSelect {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="content">
+    <div class="col-sm-10">
+        <div id="photopanel" class="col-sm-12"></div>
+        <img class="loading center-block" src="/static/img/loading.gif" style="display:none;" />
+    </div>
+    <div class="col-sm-2">
+        <h3>New photo</h3>
+        <div id="uploaded"><p>No photo uploaded yet</p></div>
+        <hr/>
+        <button id="mybutton" class="btn btn-primary"></button>
+
+        <form id="my_form" target="form_target" method="post" enctype="multipart/form-data" style="width:0px;height:0;overflow:hidden">
+            <input name="image" type="file" onchange="upload_image();this.value='';" >
+            <input id="id_csrfmiddlewaretoken" type="hidden" name="csrfmiddlewaretoken" value="$csrf_token"/>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function upload_image() {
+            $("#photopanel").hide();
+            $(".loading").show();
+            $.ajax({
+                url: '/tinymce/ajax/photologue/upload',
+                type: 'post',
+                data: new FormData($('form[id="my_form"]')[0]),
+                contentType: false,       // The content type used when sending data to the server.
+                cache: false,             // To unable request pages to be cached
+                processData:false,
+                success: function(data) {
+                    if(data.status == 0){
+                        $("#photopanel").prepend("<div class='imgSelect col-sm-3'><a href='#'><img onclick='select_img(this);' class='img-thumbnail block-center' src='"+data.thumbnail+"' data-original='"+data.original+"'/></a></div>");
+                        $("#uploaded").html("<img onclick='select_img(this);' class='img-thumbnail block-center' src='"+data.thumbnail+"' data-original='"+data.original+"'/>");
+                        $(".loading").hide();
+                        $("#photopanel").show();
+                    }else {
+                        $(".loading").hide();
+                        $("#photopanel").show();
+                        alert(data.msg);
+                    }
+                },error: function(){
+                    $(".loading").hide();
+                    $("#photopanel").show();
+                    alert("Something wrong happend");
+                }
+
+            });
+        }
+
+        function select_img(obj) {
+            var args = top.tinymce.activeEditor.windowManager.getParams();
+            args.setUrl($(obj).attr("data-original"));
+            top.tinymce.activeEditor.windowManager.close();
+        }
+
+        $(document).ready(function(){
+            $("#photopanel").hide();
+            $(".loading").show();
+            $.ajax({
+                url: '/tinymce/ajax/photologue/get_photos',
+                type: 'get',
+                success: function(data) {
+                    var args = top.tinymce.activeEditor.windowManager.getParams();
+                    var setURL = args.setUrl;
+                    $("#mybutton").html(args.button);
+                    var csrftoken = getCookie('csrftoken');
+                    $("#id_csrfmiddlewaretoken").val(csrftoken);
+
+                    data.map(function(item) {
+                        $("#photopanel").append("<div class='imgSelect col-sm-3'><a href='#'><img onclick='select_img(this);' class='img-thumbnail block-center' src='"+item.thumbnail+"' data-original='"+item.original+"'/></a></div>")
+                    });
+
+                    $("#mybutton").click(function(){
+                        $('#my_form input').click();
+                    });
+                    $(".loading").hide();
+                    $("#photopanel").show();
+                }
+            });
+
+        });
+    </script>
+</div>
